@@ -38,3 +38,4 @@ go get go.zoe.im/gopkg
 - [ ] More test
 - [ ] Pipe with CI
 - [ ] Badges in README
+- [ ] Support special version
