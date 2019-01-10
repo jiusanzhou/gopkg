@@ -10,6 +10,6 @@ func init() {
 }
 
 func setup(c *caddy.Controller) error {
-
+	// TODO
 	return nil
 }
