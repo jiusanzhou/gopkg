@@ -35,3 +35,6 @@ go get go.zoe.im/gopkg
 ## TODO
 
 - [ ] Caddy pluginable
+- [ ] More test
+- [ ] Pipe with CI
+- [ ] Badges in README
