@@ -3,6 +3,7 @@ package gopkg // import "go.zoe.im/gopkg/gopkg"
 import (
 	"encoding/json"
 	"fmt"
+	"html/template"
 	"net/http"
 	"runtime"
 	"strings"
@@ -12,6 +13,8 @@ import (
 var (
 	STAT_OK = []byte("ok")
 )
+
+var gogethtml = template.Must(template.New("go-get").Parse(`<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="go-import" content="{{.FullPkg}} {{.Vcs}} {{.URL}}"><meta http-equiv="refresh" content="0; URL='{{.URL}}'" /></head></html>`))
 
 type RepoPrefix struct {
 	Scheme string
@@ -121,19 +124,37 @@ func (inst *Instance) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// to handle more
 	repo := &Repo{inst.repoPrefix[0], "", ""}
 
+	// FullPkg: Host/Pkg or Host/User/Pkg
+
+	var fullPkgKeys = []string{r.Host}
+
 	// TODO handle with version
 	switch len(keys) {
 	case 1:
 		repo.Pkg = keys[0]
+		fullPkgKeys = append(fullPkgKeys, repo.Pkg)
 	case 2:
 		repo.RepoPrefix.User = keys[0]
 		repo.Pkg = keys[1]
+		fullPkgKeys = append(fullPkgKeys, repo.RepoPrefix.User, repo.Pkg)
 	default:
 		// TODO handle with version
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
 
-	w.Header().Set("Location", repo.String())
-	w.WriteHeader(http.StatusTemporaryRedirect)
+	// render the go-get html
+	gogethtml.Execute(w, struct {
+		FullPkg string
+		Vcs     string
+		URL     string
+	}{
+		FullPkg: strings.Join(fullPkgKeys, "/"),
+		Vcs: "git",
+		URL: repo.String(),
+	})
+
+	return
+	//w.Header().Set("Location", repo.String())
+	//w.WriteHeader(http.StatusTemporaryRedirect)
 }
