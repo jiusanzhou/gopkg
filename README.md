@@ -1,7 +1,10 @@
-# gopkg
-
-
-Gopkg which can be used as a middleware or standalone app allows you to create vanity Go import urls.
+<p align="center">
+    <img src="./logos/gopkg.jpeg" alt="💜 楠" width="200" height="200"/>
+</p>
+<br />
+<h3 align="center">
+    Gopkg which can be used as a middleware or standalone app allows you to create vanity Go import urls.
+</h3>
 
 ## Usage
 
