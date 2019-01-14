@@ -47,7 +47,6 @@ type stat struct {
 	Threads int    `json:"threads"`
 	GC      string `json:"gc_pause"`
 
-	// TODO:
 	last_refresh int64
 }
 
