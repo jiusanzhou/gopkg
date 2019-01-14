@@ -14,7 +14,12 @@ var (
 	STAT_OK = []byte("ok")
 )
 
+const (
+	MAX_STAT_REFLASH = 10
+)
+
 var gogethtml = template.Must(template.New("go-get").Parse(`<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="go-import" content="{{.FullPkg}} {{.Vcs}} {{.URL}}"><meta http-equiv="refresh" content="0; URL='{{.URL}}'" /></head></html>`))
+
 
 type RepoPrefix struct {
 	Scheme string
@@ -53,6 +58,7 @@ func (s *stat) refresh() {
 	s.Threads = runtime.NumGoroutine()
 	s.Memory = fmt.Sprintf("%.2fmb", float64(mstat.Alloc)/float64(1024*1024))
 	s.GC = fmt.Sprintf("%.3fms", float64(mstat.PauseTotalNs)/(1000*1000))
+	s.last_refresh = time.Now().Unix()
 }
 
 // NewInstance ...
@@ -107,6 +113,9 @@ func (inst *Instance) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// handle runtime stat
 	if r.URL.Path == "/_stat" {
 		data, _ := json.Marshal(inst.stat)
+		if inst.stat.last_refresh < time.Now().Unix() - MAX_STAT_REFLASH {
+			inst.stat.refresh()
+		}
 		w.Write(data)
 		w.Header().Set("Content-Type", "application/json")
 		return
