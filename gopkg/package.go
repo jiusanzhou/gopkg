@@ -55,16 +55,16 @@ func (pkg *Package) Init(gopkg *Gopkg) error {
 
 		// first of all, we need to generate pkgurl at first
 		if pkg.PkgURL == "" {
-			pkg.PkgURL = pkg.previous.PkgURL + "/" + pkg.Name
+			pkg.PkgURL = pkg.previous.PkgURL
 		}
+
+		if strings.Index(pkg.Path, "://") <= 0 {
+			pkg.Path = pkg.previous.Path
+		}
+
 
 		// rename with prefix with previous name
 		pkg.Name = pkg.previous.Name + "/" + pkg.Name
-
-		if strings.Index(pkg.Path, "://") <= 0 {
-			pkg.Path = pkg.previous.Path + "/" + pkg.Path
-		}
-
 	}
 
 	pkg.URL = pkg.Path
