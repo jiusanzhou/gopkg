@@ -1,7 +1,6 @@
 package gopkg
 
 import (
-	"path/filepath"
 	"strings"
 )
 
@@ -53,27 +52,31 @@ func (pkg *Package) Init(gopkg *Gopkg) error {
 	// generate url and pkg url
 	if pkg.previous != nil {
 		// append if we are a child package
-		if strings.Index(pkg.Path, "://") < 0 {
+
+		// first of all, we need to generate pkgurl at first
+		if pkg.PkgURL == "" {
+			pkg.PkgURL = pkg.previous.PkgURL + "/" + pkg.Name
+		}
+
+		// rename with prefix with previous name
+		pkg.Name = pkg.previous.Name + "/" + pkg.Name
+
+		if strings.Index(pkg.Path, "://") <= 0 {
 			pkg.Path = pkg.previous.Path + "/" + pkg.Path
 		}
 
-		if pkg.PkgURL == "" {
-			pkg.PkgURL = filepath.Join(pkg.previous.PkgURL, pkg.Name)
-		}
+	}
 
-	} else {
-		// build if we are a root package
-		pkg.URL = pkg.Path
-		if !strings.HasPrefix(pkg.URL, "http") {
-			pkg.URL = pkg.Schema + "://" + pkg.Path
-		}
+	pkg.URL = pkg.Path
+	if !strings.HasPrefix(pkg.URL, "http") {
+		pkg.URL = pkg.Schema + "://" + pkg.Path
+	}
 
-		if pkg.PkgURL == "" {
-			if gopkg.Base == "" {
-				pkg.PkgURL = gopkg.Host + "/" + pkg.Name
-			} else {
-				pkg.PkgURL = gopkg.Host + "/" + gopkg.Base + "/" + pkg.Name
-			}
+	if pkg.PkgURL == "" {
+		if gopkg.Base == "" {
+			pkg.PkgURL = gopkg.Host + "/" + pkg.Name
+		} else {
+			pkg.PkgURL = gopkg.Host + "/" + gopkg.Base + "/" + pkg.Name
 		}
 	}
 
@@ -107,8 +110,11 @@ func (pkg *Package) Init(gopkg *Gopkg) error {
 
 	// call the sub package init
 	for _, p := range pkg.Sub {
+		p.previous = pkg
 		// ignore sub package init error
 		_ = p.Init(gopkg)
+		// append files
+		pkg.Files = append(pkg.Files, p.Files...)
 	}
 
 	return nil
