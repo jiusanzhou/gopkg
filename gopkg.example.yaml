@@ -1,5 +1,6 @@
 name: Zoe's golang packages
 description: Zoe's golang packages
+metadata:
 host: go.zoe.im
 base:
 theme:

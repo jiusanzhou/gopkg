@@ -80,10 +80,12 @@ func (pkg *Package) Init(gopkg *Gopkg) error {
 	// load from global
 	var tpls = make(map[string]*Template)
 
-	for k, t := range gopkg.Templates {
+	// laod from global
+	for k, t := range gopkg.PkgTemplates {
 		tpls[k] = t
 	}
 
+	// load from self pacakge
 	for k, t := range pkg.Templates {
 		tpls[k] = t
 	}
@@ -93,7 +95,7 @@ func (pkg *Package) Init(gopkg *Gopkg) error {
 		// init template
 		err := t.Init()
 		if err != nil {
-			continue
+			return err
 		}
 
 		f, err := t.Render(pkg)

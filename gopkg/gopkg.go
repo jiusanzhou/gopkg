@@ -5,15 +5,33 @@ import (
 )
 
 var (
+	defaultReadmeTpl = &Template{
+		Name: "README.md",
+		Content: `| PACKAGE | GODOC | SOURCE |
+|---------|-------|--------|{{ range .Packages }}
+| {{.Name}} | [![GoDoc](https://godoc.org/{{.Path}}?status.svg)](https://godoc.org/{{.Path}}) | [{{.PkgURL}}](https://{{.PkgURL}}) |{{ end }}
+
+---
+
+> Generated using [gopkg](https://go.zoe.im/gopkg) with :heart:.`,
+	}
+	defaultCnameTpl = &Template{
+		Name:    "CNAME",
+		Content: `{{.Host}}`,
+	}
+
 	defaultPkgIndexTpl = &Template{
 		Name: "{{.Name}}/index.html",
 		Content: `<!DOCTYPE html>
-<html lang="en">
+<html>
 	<head>
-		<meta charset="utf-8" />
 		<meta name="go-import" content="{{.PkgURL}} {{.Type}} {{.URL}}" />
-		<meta http-equiv="refresh" content="0; URL='{{.URL}}'" />
+		<meta name="go-source" content="{{ .PkgURL }} {{.URL}} {{.URL}}/tree/master{/dir} {{.URL}}/tree/master{/dir}/{file}#L{line}">
+		<meta http-equiv="refresh" content="0; url=https://{{.URL}}">
 	</head>
+	<body>
+		Nothing to see here. Please <a href="{{.URL}}">move along</a>.
+	</body>
 </html>`,
 	}
 
@@ -25,21 +43,28 @@ var (
 
 // Gopkg is the main struct for generator or server
 type Gopkg struct {
-	Name        string               `yaml:"name"`
-	Description string               `yaml:"description"`
-	Host        string               `yaml:"host"`
-	Base        string               `yaml:"base"`
-	Theme       string               `yaml:"theme"`
-	Packages    []*Package           `yaml:"packages"`
-	Templates   map[string]*Template `yaml:"templates"`
+	Name         string                 `yaml:"name"`
+	Description  string                 `yaml:"description"`
+	Host         string                 `yaml:"host"`
+	Base         string                 `yaml:"base"`
+	Theme        string                 `yaml:"theme"`
+	Packages     []*Package             `yaml:"packages"`
+	Templates    map[string]*Template   `yaml:"templates"`
+	PkgTemplates map[string]*Template   `yaml:"pkg_templates"`
+	Metadata     map[string]interface{} `yaml:"metadata"`
 
-	// for self template
+	// loaded files store here
+	Files []*File
 }
 
 // NewGopkg return a new gopkg
 func NewGopkg() *Gopkg {
 	return &Gopkg{
 		Templates: map[string]*Template{
+			"readme": defaultReadmeTpl,
+			"cname":  defaultCnameTpl,
+		},
+		PkgTemplates: map[string]*Template{
 			"index":  defaultPkgIndexTpl,
 			"readme": defaultPkgReadmeTpl,
 		},
@@ -60,21 +85,29 @@ func (pkg *Gopkg) Init() error {
 		}
 	}
 
+	// init self
+	if pkg.Templates == nil {
+		pkg.Templates = make(map[string]*Template)
+	}
+
+	for _, t := range pkg.Templates {
+		err := t.Init()
+		if err != nil {
+			return err
+		}
+
+		f, err := t.Render(pkg)
+		if err != nil {
+			return err
+		}
+		pkg.Files = append(pkg.Files, f)
+	}
+
 	return nil
 }
 
-// Generate htmls
+// Generate htmls, TODO: move generate files at here
 func (pkg *Gopkg) Generate(target string) error {
-
-	// take files from packages and write to file
-	for _, pk := range pkg.Packages {
-		for _, f := range pk.Files {
-			err := f.Write(target)
-			if err != nil {
-				return err
-			}
-		}
-	}
 
 	return nil
 }

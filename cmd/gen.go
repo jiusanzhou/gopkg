@@ -53,6 +53,16 @@ func (gen *generator) run() error {
 		return err
 	}
 
+	for _, f := range gen.gopkg.Files {
+		if gen.debug {
+			log.Println("[gopkg] [gen] generate file:", f.Path)
+		}
+		err := f.Write(gen.target)
+		if err != nil {
+			log.Printf("[gopkg] [gen] generate file: %s, error: %s\n", f.Path, err)
+		}
+	}
+
 	for _, pk := range gen.gopkg.Packages {
 		for _, f := range pk.Files {
 			if gen.debug {
