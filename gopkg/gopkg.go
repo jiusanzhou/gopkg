@@ -27,7 +27,7 @@ var (
 	<head>
 		<meta name="go-import" content="{{.PkgURL}} {{.Type}} {{.URL}}" />
 		<meta name="go-source" content="{{ .PkgURL }} {{.URL}} {{.URL}}/tree/master{/dir} {{.URL}}/tree/master{/dir}/{file}#L{line}">
-		<meta http-equiv="refresh" content="0; url=https://{{.URL}}">
+		<meta http-equiv="refresh" content="0; url={{.URL}}">
 	</head>
 	<body>
 		Nothing to see here. Please <a href="{{.URL}}">move along</a>.
