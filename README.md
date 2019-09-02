@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="./logos/gopkg.jpeg" alt="💜 楠" width="200" height="200"/>
+    <img src="./logos/gopkg.jpeg" alt="💜" width="200" height="200"/>
 </p>
 <br />
 <h3 align="center">

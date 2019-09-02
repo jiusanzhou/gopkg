@@ -1,0 +1,15 @@
+name: Zoe's golang packages
+description: Zoe's golang packages
+metadata:
+host: go.zoe.im
+base:
+theme:
+packages:
+- name: gopkg
+  type: git
+  schema: https
+  path: github.com/jiusanzhou/gopkg
+- name: x
+  path: github.com/jiusanzhou/x
+  sub:
+  - name: cli
